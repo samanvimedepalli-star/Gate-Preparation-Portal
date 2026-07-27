@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Quiz</title>
+</head>
+<body>
+
+<h1>Create Quiz</h1>
+
+<input type="text"
+       id="title"
+       placeholder="Quiz Title">
+
+<br><br>
+
+<input type="text"
+       id="subject"
+       placeholder="Subject">
+
+<br><br>
+
+<input type="number"
+       id="duration"
+       placeholder="Duration (Minutes)">
+
+<br><br>
+
+<label>Available From</label>
+<br>
+
+<input type="datetime-local"
+       id="from">
+
+<br><br>
+
+<label>Available Until</label>
+<br>
+
+<input type="datetime-local"
+       id="until">
+
+<br><br>
+
+<button onclick="createQuiz()">
+    Create Quiz
+</button>
+
+<p id="result"></p>
+
+<script>
+
+async function createQuiz(){
+
+    const title =
+        document.getElementById("title").value;
+
+    const subject =
+        document.getElementById("subject").value;
+
+    const duration =
+        document.getElementById("duration").value;
+
+    const available_from =
+        document.getElementById("from").value;
+
+    const available_until =
+        document.getElementById("until").value;
+
+    const response =
+        await fetch(
+            "http://localhost:3000/quizzes",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":
+                    "application/json"
+                },
+                body:JSON.stringify({
+                    title,
+                    subject,
+                    duration_minutes:
+                    duration,
+                    available_from,
+                    available_until,
+                    created_by:
+                    "Samanvi"
+                })
+            }
+        );
+
+    const data =
+        await response.json();
+
+    document.getElementById(
+        "result"
+    ).innerText =
+    data.message;
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Material</title>
+</head>
+<body>
+
+<h2>Add GATE Material</h2>
+
+<input type="text" id="subject" placeholder="Subject">
+<br><br>
+
+<input type="text" id="topic" placeholder="Topic">
+<br><br>
+
+<input type="text" id="difficulty" placeholder="Difficulty">
+<br><br>
+
+<input
+    type="text"
+    id="pdfPath"
+    placeholder="PDF Filename">
+
+<br><br>
+
+<textarea
+    id="content"
+    rows="10"
+    cols="50"
+    placeholder="Enter Notes">
+</textarea>
+
+<br><br>
+
+<button onclick="addMaterial()">
+    Add Material
+</button>
+
+<p id="result"></p>
+
+<script>
+
+async function addMaterial(){
+
+    const subject =
+        document.getElementById("subject").value;
+
+    const topic =
+        document.getElementById("topic").value;
+
+    const difficulty =
+        document.getElementById("difficulty").value;
+
+    const content =
+        document.getElementById("content").value;
+
+    const pdf_path =
+    document.getElementById(
+        "pdfPath"
+    ).value;
+    
+    const response =
+        await fetch(
+            "http://localhost:3000/materials",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":
+                    "application/json"
+                },
+                body:JSON.stringify({
+                    subject,
+                    topic,
+                    difficulty,
+                    content,
+                    pdf_path,
+                    created_by:
+                    "Samanvi"
+                })
+            }
+        );
+
+    const data =
+        await response.json();
+
+    
+    document.getElementById(
+        "result"
+    ).innerText =
+    data.message;
+}
+
+</script>
+
+</body>
+</html>

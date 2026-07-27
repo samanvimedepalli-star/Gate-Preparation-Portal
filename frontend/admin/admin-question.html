@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Question</title>
+</head>
+<body>
+
+<h1>Add Question</h1>
+
+<input type="number"
+       id="quizId"
+       value="1"
+       placeholder="Quiz ID">
+
+<br><br>
+
+<select id="questionType">
+    <option value="MCQ">MCQ</option>
+    <option value="MSQ">MSQ</option>
+    <option value="NAT">NAT</option>
+</select>
+
+<br><br>
+
+<textarea
+    id="question"
+    rows="4"
+    cols="60"
+    placeholder="Enter Question">
+</textarea>
+
+<br><br>
+
+<input type="text" id="optionA" placeholder="Option A">
+<br><br>
+
+<input type="text" id="optionB" placeholder="Option B">
+<br><br>
+
+<input type="text" id="optionC" placeholder="Option C">
+<br><br>
+
+<input type="text" id="optionD" placeholder="Option D">
+<br><br>
+
+<input type="text"
+       id="correctAnswer"
+       placeholder="Correct Answer">
+
+<br><br>
+
+<input type="number"
+       id="marks"
+       value="1"
+       placeholder="Marks">
+
+<br><br>
+
+<input type="number"
+       step="0.01"
+       id="negativeMarks"
+       value="0"
+       placeholder="Negative Marks">
+
+<br><br>
+
+<button onclick="addQuestion()">
+    Add Question
+</button>
+
+<p id="result"></p>
+
+<script>
+
+async function addQuestion(){
+
+    const response =
+        await fetch(
+            "http://localhost:3000/questions",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":
+                    "application/json"
+                },
+                body:JSON.stringify({
+
+                    quiz_id:
+                    document.getElementById("quizId").value,
+
+                    question:
+                    document.getElementById("question").value,
+
+                    question_type:
+                    document.getElementById("questionType").value,
+
+                    option_a:
+                    document.getElementById("optionA").value,
+
+                    option_b:
+                    document.getElementById("optionB").value,
+
+                    option_c:
+                    document.getElementById("optionC").value,
+
+                    option_d:
+                    document.getElementById("optionD").value,
+
+                    correct_answer:
+                    document.getElementById("correctAnswer").value,
+
+                    marks:
+                    document.getElementById("marks").value,
+
+                    negative_marks:
+                    document.getElementById("negativeMarks").value
+
+                })
+            }
+        );
+
+    const data =
+        await response.json();
+
+    document.getElementById(
+        "result"
+    ).innerText =
+    data.message;
+}
+
+</script>
+
+</body>
+</html>

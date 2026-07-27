@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Student Dashboard</title>
+
+    <link rel="stylesheet" href="../css/dashboard.css">
+    
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <h1>🎓 GATE Portal</h1>
+
+     <button onclick="showHome()">
+    <i class="fa-solid fa-house"></i>
+    Home
+</button>
+
+<button onclick="showMaterials()">
+    <i class="fa-solid fa-book"></i>
+    Materials
+</button>
+
+<button onclick="showQuiz()">
+    <i class="fa-solid fa-file-pen"></i>
+    Weekly Quiz
+</button>
+
+<button onclick="showAttempts()">
+    <i class="fa-solid fa-chart-column"></i>
+    My Attempts
+</button>
+
+<button onclick="showProfile()">
+    <i class="fa-solid fa-user"></i>
+    Profile
+</button>
+
+
+
+</div>
+
+
+<div class="main">
+
+    <div class="topbar">
+
+        <h2>Student Dashboard</h2>
+
+      <button class="logout-btn" onclick="logout()">
+    Logout
+</button>
+    </div>
+
+    <div id="content">
+
+    </div>
+
+</div>
+
+<script src="../js/dashboard.js"></script>
+
+</body>
+
+</html>

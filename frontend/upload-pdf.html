@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Upload PDF</h1>
+
+<input type="file"
+       id="pdfFile">
+
+<br><br>
+
+<button onclick="uploadPDF()">
+Upload
+</button>
+
+<p id="result"></p>
+
+<script>
+
+async function uploadPDF(){
+
+    const file =
+        document.getElementById(
+            "pdfFile"
+        ).files[0];
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "pdf",
+        file
+    );
+
+    const response =
+        await fetch(
+            "http://127.0.0.1:3000/upload-pdf",
+            {
+                method:"POST",
+                body: formData
+            }
+        );
+
+    const data =
+        await response.json();
+
+    document.getElementById(
+        "result"
+    ).innerText =
+    data.file;
+}
+
+</script>
+
+</body>
+</html>

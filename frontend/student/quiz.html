@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GATE Quiz</title>
+    <link rel="stylesheet" href="../css/quiz.css">
+</head>
+<body>
+
+<div class="topbar">
+
+    <h1>GATE Quiz</h1>
+
+    <h2 id="timer"></h2>
+
+</div>
+
+<div class="main">
+
+    <div class="quiz-card">
+
+        <div id="questionArea"></div>
+
+        <div class="buttons">
+
+            <button onclick="prevQuestion()">
+                Previous
+            </button>
+
+            <button onclick="markForReview()">
+                Review
+            </button>
+
+            <button onclick="clearResponse()">
+                Clear
+            </button>
+
+            <button onclick="nextQuestion()">
+                Next
+            </button>
+
+            <button onclick="submitQuiz()">
+                Submit
+            </button>
+
+        </div>
+
+        <div id="resultArea"></div>
+
+    </div>
+
+    <div class="palette">
+
+        <h3>Questions</h3>
+
+        <div id="palette"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+let questions = [];
+let currentIndex = 0;
+let timeLeft = 30;
+let answers = {};
+let reviewQuestions = {};
+
+async function loadQuestions(){
+
+    const check =
+        await fetch(
+        "http://127.0.0.1:3000/attempts/check?user_email=samanvimedepalli@gmail.com&quiz_id=1"
+        );
+
+    const result =
+        await check.json();
+
+    if(result.attempted){
+
+        document.body.innerHTML = `
+        <h1>
+        You have already attempted
+        this quiz.
+        </h1>
+        `;
+
+        return;
+    }
+
+    const response =
+        await fetch(
+            "http://127.0.0.1:3000/questions/1"
+        );
+
+    questions =
+        await response.json();
+startTimer();
+    showQuestion();
+}
+
+function showQuestion(){
+
+    const q = questions[currentIndex];
+
+    let answerBox = "";
+
+    // MCQ
+    if(q.question_type === "MCQ"){
+
+        answerBox = `
+
+        <label class="option">
+            <input type="radio"
+                   name="answer"
+                   value="A"
+                   ${answers[q.id]=="A"?"checked":""}>
+            A. ${q.option_a}
+        </label>
+
+        <br><br>
+
+        <label class="option">
+            <input type="radio"
+                   name="answer"
+                   value="B"
+                   ${answers[q.id]=="B"?"checked":""}>
+            B. ${q.option_b}
+        </label>
+
+        <br><br>
+
+        <label class="option">
+            <input type="radio"
+                   name="answer"
+                   value="C"
+                   ${answers[q.id]=="C"?"checked":""}>
+            C. ${q.option_c}
+        </label>
+
+        <br><br>
+
+        <label class="option">
+            <input type="radio"
+                   name="answer"
+                   value="D"
+                   ${answers[q.id]=="D"?"checked":""}>
+            D. ${q.option_d}
+        </label>
+
+        `;
+    }
+
+    // MSQ
+    else if(q.question_type === "MSQ"){
+
+        const selected =
+            (answers[q.id] || "").split(",");
+
+        answerBox = `
+
+        <label class="option">
+            <input type="checkbox"
+                   value="A"
+                   ${selected.includes("A")?"checked":""}>
+            A. ${q.option_a}
+        </label>
+
+        <br><br>
+
+        <label class="option">
+            <input type="checkbox"
+                   value="B"
+                   ${selected.includes("B")?"checked":""}>
+            B. ${q.option_b}
+        </label>
+
+        <br><br>
+
+        <label class="option">
+            <input type="checkbox"
+                   value="C"
+                   ${selected.includes("C")?"checked":""}>
+            C. ${q.option_c}
+        </label>
+
+        <br><br>
+
+        <label class="option">
+            <input type="checkbox"
+                   value="D"
+                   ${selected.includes("D")?"checked":""}>
+            D. ${q.option_d}
+        </label>
+
+        `;
+    }
+
+    // NAT
+    else{
+
+        answerBox = `
+        <input
+            type="text"
+            id="answer"
+            value="${answers[q.id] || ""}">
+        `;
+    }
+
+    document.getElementById("questionArea").innerHTML = `
+
+<h2>
+Question ${currentIndex + 1} of ${questions.length}
+</h2>
+
+<p>${q.question}</p>
+
+${answerBox}
+
+`;
+    
+
+    renderPalette();
+}
+
+function saveAnswer(){
+
+    const q = questions[currentIndex];
+
+    // MCQ
+    if(q.question_type === "MCQ"){
+
+        const selected =
+            document.querySelector(
+                'input[name="answer"]:checked'
+            );
+
+        answers[q.id] =
+            selected ? selected.value : "";
+    }
+
+    // MSQ
+    else if(q.question_type === "MSQ"){
+
+        const checked =
+            document.querySelectorAll(
+                'input[type="checkbox"]:checked'
+            );
+
+        const values =
+            [...checked]
+            .map(x => x.value);
+
+        answers[q.id] =
+            values.join(",");
+    }
+
+    // NAT
+    else{
+
+        answers[q.id] =
+            document.getElementById(
+                "answer"
+            ).value;
+    }
+}
+
+function nextQuestion(){
+
+    saveAnswer();
+
+    if(
+        currentIndex <
+        questions.length - 1
+    ){
+        currentIndex++;
+        showQuestion();
+    }
+renderPalette();
+}
+
+
+function prevQuestion(){
+
+    saveAnswer();
+
+    if(currentIndex > 0){
+        currentIndex--;
+        showQuestion();
+    }
+renderPalette();
+}
+
+function renderPalette(){
+
+    let html = "";
+
+    questions.forEach((q,index)=>{
+
+        let color = "#cccccc";
+
+if(reviewQuestions[q.id]){
+    color = "#800080";
+}
+else if(answers[q.id]){
+    color = "#4CAF50";
+}
+
+        html += `
+        <button
+            style="
+                width:40px;
+                height:40px;
+                margin:4px;
+                background:${color};
+            "
+            onclick="goToQuestion(${index})"
+        >
+            ${index+1}
+        </button>
+        `;
+    });
+
+    document.getElementById(
+        "palette"
+    ).innerHTML = html;
+}
+
+
+function goToQuestion(index){
+
+    saveAnswer();
+
+    currentIndex = index;
+
+    showQuestion();
+
+    renderPalette();
+}
+
+function clearResponse(){
+
+    const q =
+        questions[currentIndex];
+
+    answers[q.id] = "";
+
+    showQuestion();
+}
+
+function markForReview(){
+
+    const q =
+        questions[currentIndex];
+
+    reviewQuestions[q.id] = true;
+
+    renderPalette();
+}
+
+function submitQuiz(){
+    clearInterval(timerInterval);
+    saveAnswer();
+    
+    let correct = 0;
+    let wrong = 0;
+    let score = 0;
+
+    let html = "<h2>Results</h2>";
+
+    questions.forEach(q => {
+
+        const userAnswer =
+            answers[q.id] || "";
+
+        const correctAnswer =
+            q.correct_answer;
+
+        let isCorrect = false;
+
+        if(
+            userAnswer.trim() ===
+            correctAnswer.trim()
+        ){
+            isCorrect = true;
+        }
+
+        if(isCorrect){
+
+            correct++;
+
+            score +=
+                Number(q.marks);
+
+        }
+        else if(userAnswer !== ""){
+
+            wrong++;
+
+            score -=
+                Number(q.negative_marks);
+        }
+
+        html += `
+
+        <hr>
+
+        <p>
+        <b>Question:</b>
+        ${q.question}
+        </p>
+
+        <p>
+        Your Answer:
+        ${userAnswer}
+        </p>
+
+        <p>
+        Correct Answer:
+        ${correctAnswer}
+        </p>
+
+        <p>
+        ${
+            isCorrect
+            ? "✅ Correct"
+            : "❌ Wrong"
+        }
+        </p>
+
+        `;
+    });
+
+    const accuracy =
+        correct + wrong > 0
+        ?
+        (
+            correct /
+            (correct + wrong)
+        ) * 100
+        :
+        0;
+
+    html = `
+
+    <h1>Quiz Result</h1>
+
+    <p>
+    Score:
+    ${score}
+    </p>
+
+    <p>
+    Correct:
+    ${correct}
+    </p>
+
+    <p>
+    Wrong:
+    ${wrong}
+    </p>
+
+    <p>
+    Accuracy:
+    ${accuracy.toFixed(2)}%
+    </p>
+
+    ` + html;
+
+    fetch(
+    "http://127.0.0.1:3000/attempts",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type":
+            "application/json"
+        },
+        body: JSON.stringify({
+
+            user_email:
+            "samanvimedepalli@gmail.com",
+
+            quiz_id: 1,
+
+            score: score,
+
+            correct_count:
+            correct,
+
+            wrong_count:
+            wrong
+
+        })
+    }
+);
+
+    document.getElementById(
+        "resultArea"
+    ).innerHTML = html;
+}
+
+let timerInterval;
+
+function startTimer(){
+
+    timerInterval = setInterval(() => {
+
+        let minutes =
+            Math.floor(timeLeft / 60);
+
+        let seconds =
+            timeLeft % 60;
+
+        document.getElementById(
+            "timer"
+        ).innerText =
+        `Time Left: ${
+            minutes
+        }:${
+            seconds
+            .toString()
+            .padStart(2,'0')
+        }`;
+
+        timeLeft--;
+
+        if(timeLeft < 0){
+
+            clearInterval(timerInterval);
+
+            alert(
+                "Time is up! Submitting Quiz."
+            );
+
+            submitQuiz();
+        }
+
+    },1000);
+
+}
+
+loadQuestions();
+
+</script>
+
+</body>
+</html>

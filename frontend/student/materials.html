@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GATE Materials</title>
+
+    <link rel="stylesheet" href="../css/materials.css">
+
+</head>
+<body>
+
+<h1>📚 GATE Study Materials</h1>
+
+<input
+type="text"
+id="search"
+placeholder="Search by topic..."
+onkeyup="loadMaterials()">
+
+<br><br>
+
+<div id="materials"></div>
+
+<script>
+
+async function loadMaterials(){
+
+    const response =
+        await fetch(
+            "http://localhost:3000/materials"
+        );
+
+    const materials =
+        await response.json();
+
+    const keyword =
+    document.getElementById("search").value.toLowerCase();
+
+    const container =
+        document.getElementById(
+            "materials"
+        );
+
+    container.innerHTML = "";
+   
+    materials
+.filter(material =>
+    material.topic.toLowerCase().includes(keyword) ||
+    material.subject.toLowerCase().includes(keyword)
+)
+.forEach(material => {
+
+        container.innerHTML += `
+
+<div class="material-card">
+
+    <div class="subject">
+        ${material.subject}
+    </div>
+
+    <div class="topic">
+        ${material.topic}
+    </div>
+
+    <div class="badge">
+        ${material.difficulty}
+    </div>
+
+    <div class="notes">
+        ${material.content.substring(0,120)}...
+    </div>
+
+    ${
+        material.pdf_path
+        ?
+        `
+        <a
+        class="download"
+        href="http://localhost:3000/uploads/${material.pdf_path}"
+        target="_blank">
+
+        📄 Download PDF
+
+        </a>
+        `
+        :
+        ""
+    }
+
+</div>
+
+`;
+
+    });
+
+}
+
+loadMaterials();
+
+</script>
+
+</body>
+</html>
